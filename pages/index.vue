@@ -1,77 +1,83 @@
 <template>
-  <v-row justify="center" align="center">
-    <v-col cols="12" sm="8" md="6">
-      <v-card class="logo py-4 d-flex justify-center">
-        <NuxtLogo />
-        <VuetifyLogo />
-      </v-card>
-      <v-card>
-        <v-card-title class="headline">
-          Welcome to the Vuetify + Nuxt.js template
-        </v-card-title>
-        <v-card-text>
-          <p>Vuetify is a progressive Material Design component framework for Vue.js. It was designed to empower developers to create amazing applications.</p>
-          <p>
-            For more information on Vuetify, check out the <a
-              href="https://vuetifyjs.com"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              documentation
-            </a>.
-          </p>
-          <p>
-            If you have questions, please join the official <a
-              href="https://chat.vuetifyjs.com/"
-              target="_blank"
-              rel="noopener noreferrer"
-              title="chat"
-            >
-              discord
-            </a>.
-          </p>
-          <p>
-            Find a bug? Report it on the github <a
-              href="https://github.com/vuetifyjs/vuetify/issues"
-              target="_blank"
-              rel="noopener noreferrer"
-              title="contribute"
-            >
-              issue board
-            </a>.
-          </p>
-          <p>Thank you for developing with Vuetify and I look forward to bringing more exciting features in the future.</p>
-          <div class="text-xs-right">
-            <em><small>&mdash; John Leider</small></em>
-          </div>
-          <hr class="my-3">
-          <a
-            href="https://nuxtjs.org/"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Nuxt Documentation
-          </a>
-          <br>
-          <a
-            href="https://github.com/nuxt/nuxt.js"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Nuxt GitHub
-          </a>
-        </v-card-text>
-        <v-card-actions>
-          <v-spacer />
-          <v-btn
-            color="primary"
-            nuxt
-            to="/inspire"
-          >
-            Continue
-          </v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-col>
-  </v-row>
+  <section class="container">
+    <div>
+      <app-logo/>
+      <h1 class="title">
+        {{name}}
+      </h1>
+      <h2 class="subtitle">
+        Nuxt.jsとFirebaseを使って簡単なWebサービスを作るテストです。
+      </h2>
+
+      <div class="links">
+        <Home v-if="!isLogin"></Home>
+        <Mypage v-if="isLogin" :user="userData"></Mypage>
+      </div>
+    </div>
+  </section>
 </template>
+
+<script>
+import firebase from '@/plugins/firebase'
+import Home from '~/components/Home.vue';
+import Mypage from '~/components/Mypage.vue';
+
+export default {
+  components: {
+    Home,
+    Mypage
+  },
+  asyncData (context) {
+    // コンポーネントをロードする前に毎回呼び出されます
+    return { name: 'Hello, World！！', isLogin: false, userData: null}
+  },
+  fetch () {
+    // `fetch` メソッドはページの描画前にストアを満たすために使用されます
+  },
+  mounted: function() {
+    firebase.auth().onAuthStateChanged(user => {
+      console.log(user);
+      if (user) {
+        this.isLogin = true;
+        this.userData = user;
+      } else {
+        this.isLogin = false;
+        this.userData = null;
+      };
+    });
+  },
+  methods: {
+    googleLogin: function() {
+      firebase.auth().signInWithRedirect(new firebase.auth.GoogleAuthProvider());
+    }
+  }
+}
+</script>
+
+<style>
+.container {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+.title {
+  font-family: "Quicksand", "Source Sans Pro", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; /* 1 */
+  display: block;
+  font-weight: 300;
+  font-size: 100px;
+  color: #35495e;
+  letter-spacing: 1px;
+}
+.subtitle {
+  font-weight: 300;
+  font-size: 42px;
+  color: #526488;
+  word-spacing: 5px;
+  padding-bottom: 15px;
+}
+.links {
+  padding-top: 15px;
+}
+</style>
